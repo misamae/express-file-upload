@@ -31,13 +31,12 @@ app.post('/api', upload.single('file'), function (req, res, next) {
 
     let command = 'cp ' + req.file.path + ' processed/' + req.file.filename;
     exec(command, function (error, stdout, stderr) {
-        console.log('callback after executing ' + command);
-        console.log(error);
-        console.log(stdout);
-        console.log(stderr);
-
         res.status(204).end();
     });
+});
+
+app.get('/api/p', function (req, res) {
+    res.sendFile('processed/1e4ee0c4b520c940cc19f5f6ed42a405.jpg')
 });
 
 let PORT = process.env.PORT || 9002;
