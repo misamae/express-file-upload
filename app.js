@@ -4,12 +4,15 @@
 
 let express = require('express');
 let multer = require('multer');
-let fs = require('fs');
+let exec = require('child_process').exec;
+
 let app = express();
 
 let DIR = './uploads/';
 
 let upload = multer({dest: DIR});
+
+console.log(__dirname);
 
 app.use(function (req, res, next) {
     res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5555');
@@ -19,33 +22,22 @@ app.use(function (req, res, next) {
     next();
 });
 
-// app.use(multer({
-//     dest: DIR,
-//     rename: function (fieldname, filename) {
-//         return filename + Date.now();
-//     },
-//     onFileUploadStart: function (file) {
-//         console.log(file.originalname + ' is starting ...');
-//     },
-//     onFileUploadComplete: function (file) {
-//         console.log(file.fieldname + ' uploaded to  ' + file.path);
-//     }
-// }).single('file'));
-
 app.get('/api', function (req, res) {
     res.send('file catcher example');
 });
 
 app.post('/api', upload.single('file'), function (req, res, next) {
-    // console.log(req);
-    // upload(req, res, function (err) {
-    //     if (err) {
-    //         return res.end(err.toString());
-    //     }
-    //
-    //     res.end('File is uploaded');
-    // });
-    console.log('is file uploaded');
+    console.log(req.file.path);
+
+    let command = 'cp ' + req.file.path + ' processed/' + req.file.filename;
+    exec(command, function (error, stdout, stderr) {
+        console.log('callback after executing ' + command);
+        console.log(error);
+        console.log(stdout);
+        console.log(stderr);
+
+        res.status(204).end();
+    });
 });
 
 let PORT = process.env.PORT || 9002;
