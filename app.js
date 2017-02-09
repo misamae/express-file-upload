@@ -28,15 +28,17 @@ app.get('/api', function (req, res) {
 
 app.post('/api', upload.single('file'), function (req, res, next) {
     console.log(req.file.path);
+    console.log(req.file);
 
     let command = 'cp ' + req.file.path + ' processed/' + req.file.filename;
     exec(command, function (error, stdout, stderr) {
-        res.status(204).end();
+        res.json({ processedFile: req.file.filename});
     });
 });
 
-app.get('/api/p', function (req, res) {
-    res.sendfile('processed/1e4ee0c4b520c940cc19f5f6ed42a405.jpg')
+app.get('/api/:p', function (req, res) {
+    console.dir(req.params.p);
+    res.sendfile(`processed/${req.params.p}`)
 });
 
 let PORT = process.env.PORT || 9002;
