@@ -5,14 +5,24 @@
 let express = require('express');
 let multer = require('multer');
 let exec = require('child_process').exec;
+let crypto = require('crypto');
+let path = require('path');
 
 let app = express();
 
 let DIR = './uploads/';
 
-let upload = multer({dest: DIR});
+let storage = multer.diskStorage({
+    destination: DIR,
+    filename: function (req, file, cb) {
+        crypto.pseudoRandomBytes(16, function (err, raw) {
+            if (err) return cb(err);
+            cb(null, raw.toString('hex') + path.extname(file.originalname))
+        })
+    }
+});
 
-console.log(__dirname);
+let upload = multer({ storage: storage });
 
 app.use(function (req, res, next) {
     res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5555');
@@ -32,6 +42,7 @@ app.post('/api', upload.single('file'), function (req, res, next) {
 
     let command = 'cp ' + req.file.path + ' processed/' + req.file.filename;
     exec(command, function (error, stdout, stderr) {
+        console.log(error);
         res.json({ processedFile: req.file.filename});
     });
 });
